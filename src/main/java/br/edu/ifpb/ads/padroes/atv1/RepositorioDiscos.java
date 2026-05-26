@@ -4,20 +4,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Classe responsável por gerenciar o repositório de discos.
- * Ela permite buscar discos por título, artista, gênero e ano de lançamento.
- * Além disso, permite adicionar e remover discos do repositório.
+ * Classe responsavel por gerenciar o repositorio de discos.
+ * Ela permite buscar discos por titulo, artista, genero e ano de lancamento.
+ * Alem disso, permite adicionar e remover discos do repositorio.
  */
 public class RepositorioDiscos {
 
-    private List<Disco> discos = new LinkedList<>();
+    private final List<Disco> discos = new LinkedList<>();
+    private final List<ObservadorDisco> interessados = new LinkedList<>();
     private String canalNotificacao;
-
-    private List<String> notificacoesDisco = new LinkedList<>();
-    private List<String> notificacoesArtista = new LinkedList<>();
-    private List<String> notificacoesGenero = new LinkedList<>();
-
-    private ServicoNotificacao servicoNotificacao = new ServicoNotificacao();
 
     public List<Disco> buscarDiscos(String titulo) {
         return discos.stream().filter(d -> d.getTitulo().toLowerCase()
@@ -55,30 +50,65 @@ public class RepositorioDiscos {
         this.canalNotificacao = canalNotificacao;
     }
 
-    public void addNotificacaoDisco(String disco) {
-        notificacoesDisco.add(disco);
+    public void addInteresse(TipoInteresse tipo, String valor, CanalNotificacao canalNotificacao) {
+        adicionarInteressado(new InteresseDisco(tipo, valor, canalNotificacao));
+    }
+
+    public void addInteresse(TipoInteresse tipo, String valor, String canalNotificacao) {
+        addInteresse(tipo, valor, CanalNotificacaoFactory.criar(canalNotificacao));
+    }
+
+    public void adicionarInteressado(ObservadorDisco interessado) {
+        interessados.add(interessado);
+    }
+
+    public void addNotificacaoDisco(String titulo) {
+        addNotificacaoDisco(titulo, canalPadrao());
+    }
+
+    public void addNotificacaoDisco(String titulo, String canalNotificacao) {
+        addInteresse(TipoInteresse.TITULO, titulo, canalNotificacao);
+    }
+
+    public void addNotificacaoDisco(String titulo, CanalNotificacao canalNotificacao) {
+        addInteresse(TipoInteresse.TITULO, titulo, canalNotificacao);
     }
 
     public void addNotificacaoArtista(String artista) {
-        notificacoesArtista.add(artista);
+        addNotificacaoArtista(artista, canalPadrao());
+    }
+
+    public void addNotificacaoArtista(String artista, String canalNotificacao) {
+        addInteresse(TipoInteresse.ARTISTA, artista, canalNotificacao);
+    }
+
+    public void addNotificacaoArtista(String artista, CanalNotificacao canalNotificacao) {
+        addInteresse(TipoInteresse.ARTISTA, artista, canalNotificacao);
     }
 
     public void addNotificacaoGenero(String genero) {
-        notificacoesGenero.add(genero);
+        addNotificacaoGenero(genero, canalPadrao());
+    }
+
+    public void addNotificacaoGenero(String genero, String canalNotificacao) {
+        addInteresse(TipoInteresse.GENERO, genero, canalNotificacao);
+    }
+
+    public void addNotificacaoGenero(String genero, CanalNotificacao canalNotificacao) {
+        addInteresse(TipoInteresse.GENERO, genero, canalNotificacao);
     }
 
     private void notificar(Disco disco) {
-        notificacoesDisco.stream().filter(d -> disco.getTitulo().contains(d)).forEach(d -> {
-            servicoNotificacao.enviarNotificacao(canalNotificacao, "Novo disco adicionado: " + disco.getTitulo());
-        });
+        interessados.stream()
+                .filter(interessado -> interessado.deveSerNotificado(disco))
+                .forEach(interessado -> interessado.atualizar(disco));
+    }
 
-        notificacoesArtista.stream().filter(d -> disco.getArtista().contains(d)).forEach(d -> {
-            servicoNotificacao.enviarNotificacao(canalNotificacao, "Novo disco do artista: " + disco.getArtista());
-        });
-
-        notificacoesGenero.stream().filter(d -> disco.getGenero().contains(d)).forEach(d -> {
-            servicoNotificacao.enviarNotificacao(canalNotificacao, "Novo disco do gênero: " + disco.getGenero());
-        });
+    private String canalPadrao() {
+        if (canalNotificacao == null || canalNotificacao.isBlank()) {
+            throw new IllegalStateException("Defina um canal padrao ou informe o canal ao cadastrar o interesse.");
+        }
+        return canalNotificacao;
     }
 
 }
