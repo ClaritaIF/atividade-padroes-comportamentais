@@ -2,6 +2,7 @@ package br.edu.ifpb.ads.padroes.atv1;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Classe responsavel por gerenciar o repositorio de discos.
@@ -16,21 +17,21 @@ public class RepositorioDiscos {
 
     public List<Disco> buscarDiscos(String titulo) {
         return discos.stream().filter(d -> d.getTitulo().toLowerCase()
-                .contains(titulo.toLowerCase())).toList();
+                .contains(titulo.toLowerCase())).collect(Collectors.toList());
     }
 
     public List<Disco> buscarDiscosPorArtista(String artista) {
         return discos.stream().filter(d -> d.getArtista().toLowerCase()
-                .contains(artista.toLowerCase())).toList();
+                .contains(artista.toLowerCase())).collect(Collectors.toList());
     }
 
     public List<Disco> buscarDiscosPorGenero(String genero) {
         return discos.stream().filter(d -> d.getGenero().toLowerCase()
-                .contains(genero.toLowerCase())).toList();
+                .contains(genero.toLowerCase())).collect(Collectors.toList());
     }
 
     public List<Disco> buscarDiscosPorAno(int ano) {
-        return discos.stream().filter(d -> d.getAnoLancamento() == ano).toList();
+        return discos.stream().filter(d -> d.getAnoLancamento() == ano).collect(Collectors.toList());
     }
 
     public void addDisco(Disco disco) {

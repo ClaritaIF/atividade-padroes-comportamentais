@@ -10,12 +10,20 @@ public final class CanalNotificacaoFactory {
             throw new IllegalArgumentException("Canal de notificacao deve ser informado.");
         }
 
-        return switch (canal.trim().toLowerCase()) {
-            case "email" -> new EmailNotificacao();
-            case "sms" -> new SmsNotificacao();
-            case "push", "push notification", "push-notification" -> new PushNotificacao();
-            default -> throw new IllegalArgumentException("Canal de notificacao desconhecido: " + canal);
-        };
+        String canalNormalizado = canal.trim().toLowerCase();
+
+        switch (canalNormalizado) {
+            case "email":
+                return new EmailNotificacao();
+            case "sms":
+                return new SmsNotificacao();
+            case "push":
+            case "push notification":
+            case "push-notification":
+                return new PushNotificacao();
+            default:
+                throw new IllegalArgumentException("Canal de notificacao desconhecido: " + canal);
+        }
     }
 
 }
